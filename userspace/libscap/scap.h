@@ -68,6 +68,21 @@ struct iovec;
 #include "plugin_info.h"
 
 //
+// The minimum API version the probe has to support before we can use it
+//
+// The reason to increment this would be a bug in the probe that userspace
+// cannot or does not want to work around.
+//
+// Note: adding new events or event fields should not need a version bump
+// here, since libscap has to suport old event formats anyway (for capture
+// files).
+//
+// If a consumer relies on events added in a new API version, it should
+// call `scap_get_probe_api_version()` and handle the result
+//
+#define SCAP_MINIMUM_PROBE_API_VERSION PPM_API_VERSION(1, 0, 0)
+
+//
 // Return types
 //
 #define SCAP_SUCCESS 0
@@ -1094,6 +1109,11 @@ int32_t scap_set_fullcapture_port_range(scap_t* handle, uint16_t range_start, ui
  * get the expanded snaplen for the correct port.
  */
 int32_t scap_set_statsd_port(scap_t* handle, uint16_t port);
+
+/**
+ * Is `probe_api_version` compatible with `required_api_version`?
+ */
+bool scap_is_api_compatible(unsigned long probe_api_version, unsigned long required_api_version);
 
 #ifdef __cplusplus
 }

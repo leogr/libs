@@ -783,6 +783,9 @@ cleanup_ioctl_procinfo:
 		}
 		ret = 0;
 		goto cleanup_ioctl_nolock;
+	} else if (cmd == PPM_IOCTL_GET_API_VERSION) {
+		ret = PPM_API_CURRENT_VERSION;
+		goto cleanup_ioctl_nolock;
 	}
 
 	mutex_lock(&g_consumer_mutex);

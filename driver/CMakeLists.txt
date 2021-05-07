@@ -36,6 +36,13 @@ option(ENABLE_DKMS "Enable DKMS on Linux" ON)
 # after the build we copy the compiled module one directory up,
 # to ${CMAKE_CURRENT_BINARY_DIR}.
 
+file(STRINGS API_VERSION DRIVER_API_VERSION LIMIT_COUNT 1)
+string(REGEX MATCHALL "[0-9]+" DRIVER_API_COMPONENTS "${DRIVER_API_VERSION}")
+list(GET DRIVER_API_COMPONENTS 0 PPM_API_CURRENT_VERSION_MAJOR)
+list(GET DRIVER_API_COMPONENTS 1 PPM_API_CURRENT_VERSION_MINOR)
+list(GET DRIVER_API_COMPONENTS 2 PPM_API_CURRENT_VERSION_PATCH)
+message(STATUS "Driver API version ${PPM_API_CURRENT_VERSION_MAJOR}.${PPM_API_CURRENT_VERSION_MINOR}.${PPM_API_CURRENT_VERSION_PATCH}")
+
 configure_file(dkms.conf.in src/dkms.conf)
 configure_file(Makefile.in src/Makefile)
 configure_file(driver_config.h.in src/driver_config.h)
@@ -48,6 +55,7 @@ set(DRIVER_SOURCES
 	kernel_hacks.h
 	main.c
 	ppm.h
+	ppm_api_version.h
 	ppm_events.c
 	ppm_events.h
 	ppm_events_public.h

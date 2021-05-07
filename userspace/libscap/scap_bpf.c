@@ -564,6 +564,7 @@ static int32_t load_bpf_file(scap_t *handle, const char *path)
 	struct bpf_map_data maps[BPF_MAPS_MAX];
 	struct utsname osname;
 	int32_t res = SCAP_FAILURE;
+	bool got_api_version = false;
 
 	if(uname(&osname))
 	{
@@ -622,19 +623,21 @@ static int32_t load_bpf_file(scap_t *handle, const char *path)
 				goto cleanup;
 			}
 		}
-		else if(strcmp(shname, "probe_version") == 0) {
-			if(strcmp(PROBE_VERSION, data->d_buf))
-			{
-				snprintf(handle->m_lasterr, SCAP_LASTERR_SIZE, "BPF probe version is %s, but running version is %s",
-					 (char *) data->d_buf, PROBE_VERSION);
-				goto cleanup;
-			}
+		else if(strcmp(shname, "probe_api_version") == 0) {
+			got_api_version = true;
+			memcpy(&handle->m_api_version, data->d_buf, sizeof(handle->m_api_version));
 		}
 		else if(strcmp(shname, "license") == 0)
 		{
 			license = data->d_buf;
 			snprintf(handle->m_lasterr, SCAP_LASTERR_SIZE, "BPF probe license is %s", license);
 		}
+	}
+
+	if(!got_api_version)
+	{
+		snprintf(handle->m_lasterr, SCAP_LASTERR_SIZE, "missing probe_api_version section");
+		goto cleanup;
 	}
 
 	if(!symbols)

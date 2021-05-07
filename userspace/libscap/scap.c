@@ -353,6 +353,7 @@ scap_t* scap_open_live_int(char *error, int32_t *rc,
 	{
 		int len;
 		uint32_t all_scanned_devs;
+		uint64_t api_version;
 
 		//
 		// Allocate the device descriptors.
@@ -393,6 +394,31 @@ scap_t* scap_open_live_int(char *error, int32_t *rc,
 			// Set close-on-exec for the fd
 			if (fcntl(handle->m_devs[j].m_fd, F_SETFD, FD_CLOEXEC) == -1) {
 				snprintf(error, SCAP_LASTERR_SIZE, "Can not set close-on-exec flag for fd for device %s (%s)", filename, scap_strerror(handle, errno));
+				scap_close(handle);
+				*rc = SCAP_FAILURE;
+				return NULL;
+			}
+
+			// Check the API version reported
+			api_version = ioctl(handle->m_devs[j].m_fd, PPM_IOCTL_GET_API_VERSION, 0);
+			if (api_version < 0)
+			{
+				snprintf(error, SCAP_LASTERR_SIZE, "Kernel module does not support PPM_IOCTL_GET_API_VERSION");
+				scap_close(handle);
+				*rc = SCAP_FAILURE;
+				return NULL;
+			}
+			if (handle->m_api_version != 0 && handle->m_api_version != api_version)
+			{
+				snprintf(error, SCAP_LASTERR_SIZE, "API version mismatch: device %s reports API version %lu.%lu.%lu, expected %lu.%lu.%lu",
+					filename,
+					PPM_API_VERSION_MAJOR(api_version),
+					PPM_API_VERSION_MINOR(api_version),
+					PPM_API_VERSION_PATCH(api_version),
+					PPM_API_VERSION_MAJOR(handle->m_api_version),
+					PPM_API_VERSION_MINOR(handle->m_api_version),
+					PPM_API_VERSION_PATCH(handle->m_api_version)
+				);
 				scap_close(handle);
 				*rc = SCAP_FAILURE;
 				return NULL;
@@ -444,6 +470,19 @@ scap_t* scap_open_live_int(char *error, int32_t *rc,
 
 			++j;
 		}
+	}
+
+	if(!scap_is_api_compatible(handle->m_api_version, SCAP_MINIMUM_PROBE_API_VERSION))
+	{
+		snprintf(error, SCAP_LASTERR_SIZE, "Probe supports API version %lu.%lu.%lu, but running version needs %d.%d.%d",
+			PPM_API_VERSION_MAJOR(handle->m_api_version),
+			PPM_API_VERSION_MINOR(handle->m_api_version),
+			PPM_API_VERSION_PATCH(handle->m_api_version),
+			PPM_API_CURRENT_VERSION_MAJOR,
+			PPM_API_CURRENT_VERSION_MINOR,
+			PPM_API_CURRENT_VERSION_PATCH);
+		*rc = SCAP_FAILURE;
+		return NULL;
 	}
 
 	for(j = 0; j < handle->m_ndevs; ++j)
@@ -2873,4 +2912,33 @@ int32_t scap_set_statsd_port(scap_t* const handle, const uint16_t port)
 
 	return SCAP_SUCCESS;
 #endif
+}
+
+bool scap_is_api_compatible(unsigned long probe_api_version, unsigned long required_api_version)
+{
+	unsigned long probe_major = PPM_API_VERSION_MAJOR(probe_api_version);
+	unsigned long probe_minor = PPM_API_VERSION_MINOR(probe_api_version);
+	unsigned long probe_patch = PPM_API_VERSION_PATCH(probe_api_version);
+	unsigned long required_major = PPM_API_VERSION_MAJOR(required_api_version);
+	unsigned long required_minor = PPM_API_VERSION_MINOR(required_api_version);
+	unsigned long required_patch = PPM_API_VERSION_PATCH(required_api_version);
+
+	if(probe_major != required_major)
+	{
+		// major numbers disagree
+		return false;
+	}
+
+	if(probe_minor < required_minor)
+	{
+		// probe's minor version is < ours
+		return false;
+	}
+	if(probe_minor == required_minor && probe_patch < required_patch)
+	{
+		// probe's patch level is < ours
+		return false;
+	}
+
+	return true;
 }

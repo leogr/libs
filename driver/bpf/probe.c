@@ -246,3 +246,5 @@ char kernel_ver[] __bpf_section("kernel_version") = UTS_RELEASE;
 char __license[] __bpf_section("license") = "GPL";
 
 char probe_ver[] __bpf_section("probe_version") = PROBE_VERSION;
+
+uint64_t probe_api_ver __bpf_section("probe_api_version") = PPM_API_CURRENT_VERSION;
