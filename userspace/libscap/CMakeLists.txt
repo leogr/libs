@@ -27,11 +27,11 @@ add_definitions(-DPLATFORM_NAME="${CMAKE_SYSTEM_NAME}")
 
 if(CMAKE_SYSTEM_NAME MATCHES "Linux")
 	if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-		set(KBUILD_FLAGS "${SYSDIG_DEBUG_FLAGS}")
+		set(KBUILD_FLAGS "${LIBS_DEBUG_FLAGS}")
 	endif()
 
     if(NOT DEFINED PROBE_VERSION)
-        set(PROBE_VERSION "${SYSDIG_VERSION}")
+        set(PROBE_VERSION "${LIBS_VERSION}")
     endif()
     if(NOT DEFINED PROBE_NAME)
         set(PROBE_NAME "falco")
