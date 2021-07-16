@@ -5,7 +5,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+# http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,6 +16,7 @@
 
 include(jsoncpp)
 include(tbb)
+
 if(NOT MINIMAL_BUILD)
 	include(curl)
 endif() # MINIMAL_BUILD
@@ -23,22 +24,18 @@ endif() # MINIMAL_BUILD
 include_directories("..")
 include_directories(${LIBSCAP_INCLUDE_DIR} ${LIBSCAP_DIR}/driver)
 
-## Public libsinsp API
+# # Public libsinsp API
 file(GLOB_RECURSE PUBLIC_SINSP_API_SUITE ${CMAKE_CURRENT_SOURCE_DIR}/public_sinsp_API/*.cpp)
 
-## Internal tables assertions
+# # Internal tables assertions
 file(GLOB_RECURSE TABLE_SUITE ${CMAKE_CURRENT_SOURCE_DIR}/table/*.cpp)
 
 set(LIBSINSP_UNIT_TESTS_SOURCES
 	test_utils.cpp
 	async_key_value_source.ut.cpp
 	cgroup_list_counter.ut.cpp
-	events_file.ut.cpp
-	events_net.ut.cpp
-	events_param.ut.cpp
-	events_proc.ut.cpp
-	events_user.ut.cpp
-	external_processor.ut.cpp
+	procfs_utils.ut.cpp
+	sinsp.ut.cpp
 	token_bucket.ut.cpp
 	ppm_api_version.ut.cpp
 	plugin_manager.ut.cpp
@@ -65,7 +62,7 @@ target_link_libraries(unit-test-libsinsp
 	sinsp
 )
 
-if (CMAKE_BUILD_TYPE STREQUAL "Coverage")
+if(CMAKE_BUILD_TYPE STREQUAL "Coverage")
 	target_link_libraries(unit-test-libsinsp
 		gcov
 	)
