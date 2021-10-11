@@ -1682,9 +1682,11 @@ static int32_t scap_next_nodriver(scap_t* handle, OUT scap_evt** pevent, OUT uin
 }
 #endif // _WIN32
 
-#ifdef _WIN32
-inline uint64_t get_windows_timestamp()
+inline uint64_t get_timestamp_ns()
 {
+	uint64_t ts;
+
+#ifdef _WIN32
 	FILETIME ft;
 	static const uint64_t EPOCH = ((uint64_t) 116444736000000000ULL);
 
@@ -1693,9 +1695,15 @@ inline uint64_t get_windows_timestamp()
 	uint64_t ftl = (((uint64_t)ft.dwHighDateTime) << 32) + ft.dwLowDateTime;
 	ftl -= EPOCH;
 
-	return ftl * 100;
+	ts = ftl * 100;
+#else
+	struct timeval tv;
+	gettimeofday(&tv, NULL);
+	ts = tv.tv_sec * (uint64_t) 1000000000 + tv.tv_usec * 1000;
+#endif
+
+	return ts;
 }
-#endif // _WIN32
 
 static int32_t scap_next_plugin(scap_t* handle, OUT scap_evt** pevent, OUT uint16_t* pcpuid)
 {
@@ -1811,14 +1819,7 @@ static int32_t scap_next_plugin(scap_t* handle, OUT scap_evt** pevent, OUT uint1
 	}
 	else
 	{
-#ifdef _WIN32
-		struct timespec ts;
-		evt->ts = get_windows_timestamp();
-#else
-		struct timeval tv;
-		gettimeofday(&tv, NULL);
-		evt->ts = tv.tv_sec * (uint64_t) 1000000000 + tv.tv_usec * 1000;
-#endif
+		evt->ts = get_timestamp_ns();
 	}
 
 	*pevent = evt;
