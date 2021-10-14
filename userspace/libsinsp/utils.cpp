@@ -45,6 +45,7 @@ limitations under the License.
 #include "sinsp_errno.h"
 #include "sinsp_signal.h"
 #include "filter.h"
+#include "filter_check_list.h"
 #include "filterchecks.h"
 #include "protodecoder.h"
 #include "uri.h"
