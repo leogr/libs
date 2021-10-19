@@ -114,20 +114,6 @@ static int32_t copy_comms(scap_t *handle, const char **suppressed_comms)
 	return SCAP_SUCCESS;
 }
 
-static void scap_free_plugin_batch_state(scap_t* handle)
-{
-	for(uint32_t i = 0; i < handle->m_input_plugin_batch_nevts; i++)
-	{
-		handle->m_input_plugin->free_mem(handle->m_input_plugin_batch_evts[i].data);
-	}
-
-	handle->m_input_plugin_batch_nevts = 0;
-	handle->m_input_plugin_batch_idx = 0;
-
-	handle->m_input_plugin->free_mem(handle->m_input_plugin_batch_evts);
-	handle->m_input_plugin_batch_evts = NULL;
-}
-
 #if !defined(HAS_CAPTURE) || defined(CYGWING_AGENT) || defined(_WIN32)
 scap_t* scap_open_live_int(char *error, int32_t *rc,
 			   proc_entry_callback proc_callback,
@@ -1206,7 +1192,6 @@ void scap_close(scap_t* handle)
 	else if(handle->m_mode == SCAP_MODE_PLUGIN)
 	{
 		handle->m_input_plugin->close(handle->m_input_plugin->state, handle->m_input_plugin->handle);
-		scap_free_plugin_batch_state(handle);
 		// name was allocated
 		handle->m_input_plugin->free_mem(handle->m_input_plugin->name);
 	}
@@ -1739,14 +1724,11 @@ static int32_t scap_next_plugin(scap_t* handle, OUT scap_evt** pevent, OUT uint1
 {
 	ss_plugin_event *plugin_evt;
 	int32_t res;
-	bool should_free_plugin_evt = false;
 
 	if(handle->m_input_plugin->next_batch != NULL)
 	{
 		if(handle->m_input_plugin_batch_idx >= handle->m_input_plugin_batch_nevts)
 		{
-			scap_free_plugin_batch_state(handle);
-
 			if(handle->m_input_plugin_last_batch_res != SS_PLUGIN_SUCCESS)
 			{
 				if(handle->m_input_plugin_last_batch_res != SCAP_TIMEOUT && handle->m_input_plugin_last_batch_res != SCAP_EOF)
@@ -1798,8 +1780,6 @@ static int32_t scap_next_plugin(scap_t* handle, OUT scap_evt** pevent, OUT uint1
 	}
 	else
 	{
-		should_free_plugin_evt = true;
-
 		ss_plugin_rc plugin_res = handle->m_input_plugin->next(handle->m_input_plugin->state,
 								       handle->m_input_plugin->handle, &plugin_evt);
 		if(plugin_res != SS_PLUGIN_SUCCESS)
@@ -1835,13 +1815,6 @@ static int32_t scap_next_plugin(scap_t* handle, OUT scap_evt** pevent, OUT uint1
 	*(uint32_t*)buf = handle->m_input_plugin->id;
 	buf += 4;
 	memcpy(buf, plugin_evt->data, plugin_evt->datalen);
-
-	if(should_free_plugin_evt)
-	{
-		handle->m_input_plugin->free_mem(plugin_evt->data);
-		plugin_evt->data = NULL;
-		handle->m_input_plugin->free_mem(plugin_evt);
-	}
 
 	if(plugin_evt->ts != UINT64_MAX)
 	{
