@@ -34,11 +34,11 @@ if(CMAKE_SYSTEM_NAME MATCHES "Linux")
         set(PROBE_VERSION "${LIBS_VERSION}")
     endif()
     if(NOT DEFINED PROBE_NAME)
-        set(PROBE_NAME "falco")
+        set(PROBE_NAME "scap")
     endif()
 
     if(NOT DEFINED PROBE_DEVICE_NAME)
-        set(PROBE_DEVICE_NAME "falco")
+        set(PROBE_DEVICE_NAME "scap")
     endif()
 
 	if(NOT DEFINED PROBE_ENV_VAR_NAME)
@@ -47,8 +47,7 @@ if(CMAKE_SYSTEM_NAME MATCHES "Linux")
 endif()
 
 if(NOT DEFINED PROBE_ENV_VAR_NAME)
-	# fallback to default
-	set(PROBE_ENV_VAR_NAME "FALCO_BPF_PROBE") 
+	set(PROBE_ENV_VAR_NAME "BPF_PROBE") 
 endif()
 add_definitions(-DPROBE_ENV_VAR_NAME="${PROBE_ENV_VAR_NAME}")
 
