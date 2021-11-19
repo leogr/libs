@@ -634,6 +634,22 @@ public:
 	}
 
 	/*!
+	  \brief Returns the API version supported by the probe
+	*/
+	inline uint64_t get_probe_api_version() const
+	{
+		return scap_get_probe_api_version(m_h);
+	}
+
+	/*!
+	  \brief Returns the minimum API version required by the userspace library
+	*/
+	inline uint64_t get_scap_api_version() const
+	{
+		return SCAP_MINIMUM_PROBE_API_VERSION;
+	}
+
+	/*!
 	  \brief Returns true if truncated environments should be loaded from /proc
 	*/
 	inline bool large_envs_enabled()

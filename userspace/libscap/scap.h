@@ -59,6 +59,7 @@ struct iovec;
 #include <time.h>
 #include "uthash.h"
 #include "../common/types.h"
+#include "../../driver/ppm_api_version.h"
 #include "../../driver/ppm_events_public.h"
 #ifdef _WIN32
 #include <time.h>
@@ -1114,6 +1115,11 @@ int32_t scap_set_statsd_port(scap_t* handle, uint16_t port);
  * Is `probe_api_version` compatible with `required_api_version`?
  */
 bool scap_is_api_compatible(unsigned long probe_api_version, unsigned long required_api_version);
+
+/**
+ * Get API version supported by the probe
+ */
+uint64_t scap_get_probe_api_version(scap_t* handle);
 
 #ifdef __cplusplus
 }

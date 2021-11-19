@@ -2942,3 +2942,8 @@ bool scap_is_api_compatible(unsigned long probe_api_version, unsigned long requi
 
 	return true;
 }
+
+uint64_t scap_get_probe_api_version(scap_t* handle)
+{
+	return handle->m_api_version;
+}
