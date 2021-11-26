@@ -56,11 +56,6 @@ limitations under the License.
 //#define NDEBUG
 #include <assert.h>
 
-//
-// Probe version string size
-//
-#define SCAP_PROBE_VERSION_SIZE 32
-
 static int32_t plugin_rc_to_scap_rc(ss_plugin_rc plugin_rc)
 {
 	switch(plugin_rc)
