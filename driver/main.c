@@ -776,8 +776,8 @@ cleanup_ioctl_procinfo:
 		}
 		ret = 0;
 		goto cleanup_ioctl_nolock;
-	} else if (cmd == PPM_IOCTL_GET_PROBE_VERSION) {
-		if (copy_to_user((void *)arg, PROBE_VERSION, sizeof(PROBE_VERSION))) {
+	} else if (cmd == PPM_IOCTL_GET_MODULE_VERSION) { 
+		if (copy_to_user((void *)arg, DRIVER_VERSION, sizeof(DRIVER_VERSION))) {
 			ret = -EINVAL;
 			goto cleanup_ioctl_nolock;
 		}
@@ -2454,7 +2454,7 @@ int sysdig_init(void)
 #else
 	struct class_device *device = NULL;
 #endif
-	pr_info("driver loading, " PROBE_NAME " " PROBE_VERSION "\n");
+	pr_info("driver loading, " PROBE_NAME " " DRIVER_VERSION "\n");
 
 	ret = get_tracepoint_handles();
 	if (ret < 0)
@@ -2633,7 +2633,7 @@ void sysdig_exit(void)
 
 module_init(sysdig_init);
 module_exit(sysdig_exit);
-MODULE_VERSION(PROBE_VERSION);
+MODULE_VERSION(DRIVER_VERSION);
 
 module_param(max_consumers, uint, 0444);
 MODULE_PARM_DESC(max_consumers, "Maximum number of consumers that can simultaneously open the devices");

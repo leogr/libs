@@ -33,10 +33,6 @@ if(CMAKE_SYSTEM_NAME MATCHES "Linux")
 		set(KBUILD_FLAGS "${FALCOSECURITY_LIBS_DEBUG_FLAGS}")
 	endif()
 
-    if(NOT DEFINED PROBE_VERSION)
-        set(PROBE_VERSION "${DRIVER_API_VERSION}")
-    endif()
-
     if(NOT DEFINED PROBE_NAME)
         set(PROBE_NAME "scap")
     endif()
