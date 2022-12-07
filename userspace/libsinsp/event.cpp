@@ -1425,7 +1425,6 @@ Json::Value sinsp_evt::get_param_as_json(uint32_t id, OUT const char** resolved_
 			break;
 		}
 	case PT_DYN:
-		ASSERT(false);
 		snprintf(&m_paramstr_storage[0],
 		         m_paramstr_storage.size(),
 		         "INVALID DYNAMIC PARAMETER");
